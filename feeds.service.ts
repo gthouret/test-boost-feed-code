@@ -22,6 +22,8 @@ export class FeedsService {
   inProgress: BehaviorSubject<boolean> = new BehaviorSubject(true);
   hasMore: Observable<boolean>;
 
+  response: any;
+
   constructor(
     protected entitiesService: EntitiesService,
     protected blockListService: BlockListService
@@ -33,7 +35,6 @@ export class FeedsService {
     this.feed = this.rawFeed.pipe(
       tap(feed => {
         if (feed.length) this.inProgress.next(true);
-        console.log('rawfeed.length: ' + feed.length);
       }),
       switchMap(async feed => {
         return feed.slice(0, await this.pageSize.pipe(first()).toPromise());
@@ -47,7 +48,6 @@ export class FeedsService {
         if (feed.length)
           // We should have skipped but..
           this.inProgress.next(false);
-        console.log('post entitiesService feed.length: ' + feed.length);
       })
     );
 
@@ -63,10 +63,6 @@ export class FeedsService {
         return inProgress || feed.length > offset;
       })
     );
-
-    this.pageSize.subscribe((val) => {
-        console.log('pageSize: ' + val);
-    })
   }
 
   /**
@@ -120,7 +116,7 @@ export class FeedsService {
   /**
    * Fetches the data.
    */
-  fetch(response: any): FeedsService {
+  fetch(): FeedsService {
     console.log('feedService fetch()');
     if (!this.offset.getValue()) {
       this.inProgress.next(true);
@@ -129,12 +125,12 @@ export class FeedsService {
     if (!this.offset.getValue()) {
       this.inProgress.next(false);
     }
-    if (!response.entities && response.activity) {
-      response.entities = response.activity;
+    if (!this.response.entities && this.response.activity) {
+      this.response.entities = this.response.activity;
     }
-    if (response.entities.length) {
-      this.rawFeed.next(this.rawFeed.getValue().concat(response.entities));
-      this.pagingToken = response['load-next'];
+    if (this.response.entities.length) {
+      this.rawFeed.next(this.rawFeed.getValue().concat(this.response.entities));
+      this.pagingToken = this.response['load-next'];
     } else {
       this.canFetchMore = false;
     }
@@ -160,6 +156,14 @@ export class FeedsService {
     this.offset.next(0);
     this.pagingToken = '';
     this.rawFeed.next([]);
+    return this;
+  }
+
+  /**
+   * Set the mock client response
+   */
+  setResponse(response): FeedsService {
+    this.response = response;
     return this;
   }
 

@@ -4,7 +4,8 @@ export class BlockListService {
   blocked: BehaviorSubject<string[]>;
 
   constructor() {
-    this.blocked = new BehaviorSubject(JSON.parse('["991463054707265537"]'));
+    //this.blocked = new BehaviorSubject(JSON.parse('["991463054707265537"]'));
+    this.blocked = new BehaviorSubject(JSON.parse('[]'));
     this.fetch();
   }
 
